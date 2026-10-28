@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ta">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>என் To-do பட்டியல்</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f3f4f6; padding:30px; }
+    main { max-width:500px; margin:40px auto; padding:25px; background:white; border-radius:16px; }
+    h1 { color:#3730a3; }
+    form { display:flex; gap:8px; }
+    input[type="text"] { flex:1; min-width:0; padding:11px; border:1px solid #ccc; border-radius:8px; }
+    button { padding:10px 14px; border:0; border-radius:8px; background:#4f46e5; color:white; cursor:pointer; }
+    ul { list-style:none; padding:0; }
+    li { display:flex; align-items:center; gap:10px; padding:12px 0; border-bottom:1px solid #eee; }
+    li span { flex:1; overflow-wrap:anywhere; }
+    li.done span { text-decoration:line-through; color:#999; }
+    .delete { background:#ef4444; }
+    #count { color:#666; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>என் To-do பட்டியல்</h1>
+    <form id="form">
+      <input id="task" type="text" placeholder="ஒரு வேலையை எழுதுங்கள்..." required>
+      <button type="submit">சேர்</button>
+    </form>
+    <p id="count"></p>
+    <ul id="list"></ul>
+  </main>
+
+  <script>
+    const form = document.querySelector("#form");
+    const input = document.querySelector("#task");
+    const list = document.querySelector("#list");
+    const count = document.querySelector("#count");
+    let tasks = JSON.parse(localStorage.getItem("myTasks") || "[]");
+
+    function showTasks() {
+      list.innerHTML = "";
+      tasks.forEach((task, index) => {
+        const row = document.createElement("li");
+        if (task.done) row.classList.add("done");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = task.done;
+        checkbox.onchange = () => {
+          tasks[index].done = checkbox.checked;
+          saveAndShow();
+        };
+
+        const text = document.createElement("span");
+        text.textContent = task.text;
+
+        const remove = document.createElement("button");
+        remove.textContent = "நீக்கு";
+        remove.className = "delete";
+        remove.onclick = () => {
+          tasks.splice(index, 1);
+          saveAndShow();
+        };
+
+        row.append(checkbox, text, remove);
+        list.append(row);
+      });
+
+      const remaining = tasks.filter(task => !task.done).length;
+      count.textContent = `மீதமுள்ள வேலைகள்: ${remaining}`;
+    }
+
+    function saveAndShow() {
+      localStorage.setItem("myTasks", JSON.stringify(tasks));
+      showTasks();
+    }
+
+    form.onsubmit = event => {
+      event.preventDefault();
+      tasks.push({ text: input.value.trim(), done: false });
+      input.value = "";
+      saveAndShow();
+    };
+
+    showTasks();
+  </script>
+</body>
+</html>
